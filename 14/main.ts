@@ -1,4 +1,4 @@
-import { ApiPromise, WsProvider } from "@polkadot/api";
+import { ApiPromise, Keyring, WsProvider } from "@polkadot/api";
 
 const WS_URL = "ws://localhost:9944";
 const connection = async () => {
@@ -7,6 +7,12 @@ const connection = async () => {
   const api = await ApiPromise.create({ provider: wsProvider });
   await api.isReady;
   return api;
+}
+
+const getSomething = async (api: ApiPromise) => {
+  const something = await api.query.templateModule.something();
+  console.log("something: ", something.toHuman());
+  return something;
 }
 
 const getevents = async (api: ApiPromise) => {
@@ -20,8 +26,13 @@ const getevents = async (api: ApiPromise) => {
 
 const main =async () => {
     const api = await connection();
+    const keyring = new Keyring({ type: 'sr25519' });
+    const alice = keyring.addFromUri('//Alice');
+    await getSomething(api);
     await getevents(api);
-    await sleep(100000);
+    await sleep(10000);
+    await getSomething(api);
+
   console.log("main!");
 }
 
